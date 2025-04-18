@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QuizCrafter AI</title>
+  <link rel="icon" href="logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="firebase.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #1f1f1f, #2c2c2c);
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .profile-container {
+      background: #2a2a2a;
+      padding: 60px 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+      text-align: center;
+      width: 320px;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .logo {
+      width: 240px;
+      margin: 0 auto 20px auto;
+    }
+
+    .profile-pic {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 10px auto;
+      border: 3px solid #61C0BF;
+    }
+
+    .user-info {
+      margin: 8px 0;
+      font-size: 1.05em;
+      color: #FAE3D9
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .btn.history {
+      background-color:#61C0BF;;
+      color: #1e1e1e;
+    }
+
+    .btn.history:hover {
+      background-color: #00bfa5;
+    }
+
+    .btn.logout {
+      background-color: #4e4e4e;
+      color: #FAE3D9;
+    }
+
+    .btn.logout:hover {
+      background-color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="profile-container">
+    <img src="logo.png" alt="QuizCrafter AI Logo" class="logo" />
+    <img id="profileImage" class="profile-pic" src="default.png" alt="Profile Picture">
+    <div class="user-info" id="userName">Loading name...</div>
+    <div class="user-info" id="userEmail">Loading email...</div>
+    <button class="btn history" onclick="goToHistory()"><i class="fas fa-clock"></i> History</button>
+    <button class="btn logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const auth = firebase.auth();
+      auth.onAuthStateChanged(user => {
+  console.log("Auth State Changed:", user); // 🔍 Debug log
+
+  if (user) {
+    document.getElementById("profileImage").src = user.photoURL || "default-profile.png";
+    document.getElementById("userName").textContent = user.displayName || "No Name";
+    document.getElementById("userEmail").textContent = user.email || "No Email";
+  } else {
+    window.location.href = "index.html"; // Redirect if not signed in
+  }
+});
+
+
+      window.logout = function () {
+        auth.signOut().then(() => {
+          window.location.href = "index.html";
+        });
+      };
+
+      window.goToHistory = function () {
+        window.location.href = "history.html";
+      };
+    });
+  </script>
+</body>
+</html>

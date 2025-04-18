@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QuizCrafter AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #0f0f0f;
+      color: white;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px 0;
+    }
+
+    .logo {
+      height: 50px;
+    }
+
+    .profile-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #00ffc8;
+      object-fit: cover;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 650px;
+      margin: 20px auto 60px auto;
+      background: #1c1c1c;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 0 25px rgba(0, 255, 200, 0.15);
+      position: relative;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .upload-area {
+      padding: 20px;
+      border: 2px dashed #777;
+      border-radius: 10px;
+      background: #2c2c2c;
+      transition: all 0.3s ease;
+    }
+
+    .upload-area:hover {
+      background: #3a3a3a;
+    }
+
+    .input-group input[type="file"],
+    .input-group input[type="number"] {
+      margin-top: 10px;
+      background: #000;
+      border: none;
+      padding: 8px;
+      color: #fff;
+      border-radius: 5px;
+    }
+
+    .button-row {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .button {
+      margin: 10px;
+      background: #00ffc8;
+      border: none;
+      color: black;
+      padding: 12px 24px;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .button:hover {
+      background: #00cfa3;
+    }
+
+    .question-box {
+      margin-top: 20px;
+      background: #2a2a2a;
+      border-radius: 15px;
+      padding: 20px;
+    }
+
+    .question-item {
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s ease-in-out forwards;
+    }
+
+    .question-box textarea {
+      width: 100%;
+      background: #111;
+      color: white;
+      padding: 10px;
+      border: 1px solid #444;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .floating-buttons {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    #summaryBox {
+      margin-top: 30px;
+      padding: 20px;
+      background: #2d2d2d;
+      border-radius: 10px;
+      animation: fadeInUp 0.6s ease-in-out;
+    }
+
+    #scoreBarContainer {
+      margin-top: 30px;
+      display: none;
+    }
+
+    .score-label {
+      font-size: 16px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    #scoreBar {
+      width: 100%;
+      background-color: #333;
+      border-radius: 20px;
+      overflow: hidden;
+      height: 24px;
+      box-shadow: 0 0 10px rgba(0,255,200,0.2);
+    }
+
+    #scoreFill {
+      height: 100%;
+      width: 0%;
+      background-color: #00ffc8;
+      transition: width 1s ease-in-out;
+      text-align: center;
+      color: black;
+      font-weight: bold;
+      line-height: 24px;
+    }
+
+    #progressContainer {
+      width: 100%;
+      height: 8px;
+      background-color: #333;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 20px;
+      display: none;
+      box-shadow: 0 0 10px rgba(0, 255, 200, 0.2);
+    }
+
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00ffc8, #00cfa3);
+      transition: width 120s linear;
+    }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.75);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .popup-content {
+      background-color: #1e1e1e;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0,255,200,0.2);
+    }
+
+    .popup-close-btn {
+      background: #00ffc8;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="logo.png" alt="QuizCrafter Logo" class="logo">
+    <div class="profile-container">
+      <a href="profile.html">
+        <img id="profilePic" src="profile.png" alt="Profile" class="profile-pic" />
+      </a>      
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="input-group">
+      <div class="upload-area">
+        <label for="pdfFile">Upload PDF:</label>
+        <input type="file" id="pdfFile" accept="application/pdf">
+        <br>
+        <label for="numQuestions">Number of Questions:</label>
+        <input type="number" id="numQuestions" value="5" min="1" max="10">
+      </div>
+    </div>
+
+    <div id="progressContainer">
+      <div id="progressBar"></div>
+    </div>
+
+    <div class="button-row">
+      <button class="button" onclick="generateQuiz()">Generate Quiz</button>
+      <button class="button" onclick="generateSummary()">Summary</button>
+    </div>
+
+    <div id="quizBox" class="question-box" style="display:none;"></div>
+
+    <div class="floating-buttons" id="postQuizButtons" style="display:none;">
+      <button class="button" onclick="checkAnswers()">Check Answers</button>
+      <button class="button" onclick="downloadQuiz()">Download Quiz</button>
+    </div>
+
+    <div id="summaryBox" style="display:none;"></div>
+
+    <div id="scoreBarContainer">
+      <div class="score-label">Your Score:</div>
+      <div id="scoreBar">
+        <div id="scoreFill">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Answer Result Popup -->
+  <div id="answerPopup" class="popup-overlay">
+    <div class="popup-content">
+      <p id="popupMessage">Answer Result</p>
+      <p class="score-label">Your Score:</p>
+      <button class="popup-close-btn" onclick="closeAnswerPopup()">Close</button>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCLiXp4zwS3y3yLlCXPJEYiWzmIBOCpSQ0",
+      authDomain: "quizcrafter-ai.firebaseapp.com",
+      projectId: "quizcrafter-ai",
+      storageBucket: "quizcrafter-ai.firebasestorage.app",
+      messagingSenderId: "585560085435",
+      appId: "1:585560085435:web:47c3de8853451527afaa9e",
+      measurementId: "G-BM1DP2XESZ"
+    };
+  
+    firebase.initializeApp(firebaseConfig);
+  </script>
+  <script>
+    let questionsArray = [];
+  
+    function showLoading() {
+      const container = document.getElementById("progressContainer");
+      const bar = document.getElementById("progressBar");
+      container.style.display = "block";
+      bar.style.width = "0%";
+      void bar.offsetWidth;
+      bar.style.width = "100%";
+    }
+  
+    function hideLoading() {
+      const container = document.getElementById("progressContainer");
+      const bar = document.getElementById("progressBar");
+      bar.style.transition = "none";
+      bar.style.width = "0%";
+      container.style.display = "none";
+      setTimeout(() => {
+        bar.style.transition = "width 80s linear";
+      }, 100);
+    }
+  
+    function generateQuiz() {
+      const file = document.getElementById("pdfFile").files[0];
+      const numQuestions = document.getElementById("numQuestions").value;
+  
+      if (!file) {
+        alert("Please select a PDF file.");
+        return;
+      }
+  
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+          console.log("✅ Signed in as:", user.email);
+        } else {
+          console.log("🚫 Not signed in.");
+        }
+      });
+  
+      showLoading();
+      document.getElementById("summaryBox").style.display = "none";
+  
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("numQuestions", numQuestions);
+  
+      fetch("http://localhost:8080/upload", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("quizBox").style.display = "block";
+        questionsArray = data.quizGeneratedByLLM
+          .split('\n')
+          .filter(q => q.trim() && !q.toLowerCase().includes("quiz"));
+        saveQuizToFirebase(questionsArray);
+  
+        const quizBox = document.getElementById("quizBox");
+        quizBox.innerHTML = "";
+        questionsArray.forEach((q, index) => {
+          const item = document.createElement("div");
+          item.className = "question-item";
+          item.innerHTML = `
+            <strong>Q${index + 1}:</strong> ${q}
+            <textarea placeholder="Your Answer..." id="answer${index}"></textarea>
+          `;
+          quizBox.appendChild(item);
+        });
+  
+        document.getElementById("postQuizButtons").style.display = "block";
+        hideLoading();
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        alert("Error generating quiz. Check backend.");
+        hideLoading();
+      });
+    }
+  
+    function saveQuizToFirebase(questions) {
+      const user = firebase.auth().currentUser;
+      if (!user) {
+        console.warn("⚠️ No user signed in. Quiz not saved.");
+        return;
+      }
+  
+      const quizData = {
+        uid: user.uid,
+        email: user.email,
+        questions: questions,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+  
+      firebase.firestore().collection("quizzes").add(quizData)
+        .then((docRef) => {
+          console.log("✅ Quiz saved to Firestore with ID:", docRef.id);
+        })
+        .catch((error) => {
+          console.error("❌ Error saving quiz to Firestore:", error);
+        });
+    }
+  
+    function generateSummary() {
+      showLoading();
+      document.getElementById("quizBox").style.display = "none";
+      document.getElementById("postQuizButtons").style.display = "none";
+  
+      fetch("http://localhost:8080/summary", { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+          const summaryBox = document.getElementById("summaryBox");
+          summaryBox.style.display = "block";
+  
+          let summary = data.summary || "";
+          summary = summary.replace(/^(Here is a.*?:|In short:)\s*/i, '');
+          summaryBox.innerHTML = `
+            <h2 style="font-size: 26px; font-weight: 700; margin-bottom: 15px;">Summary</h2>
+            <p style="font-size: 16px; line-height: 1.6;">${summary}</p>
+          `;
+          hideLoading();
+        })
+        .catch(err => {
+          console.error("Summary error", err);
+          alert("Error generating summary.");
+          hideLoading();
+        });
+    }
+  
+    function checkAnswers() {
+      showLoading();
+      const answers = questionsArray.map((_, index) =>
+        document.getElementById(`answer${index}`).value.trim()
+      ).join("\n");
+  
+      fetch("http://localhost:8080/check-answers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          questions: questionsArray.join("\n"),
+          answers: answers
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log("Evaluation String:", data.evaluation);
+  
+        let match = data.evaluation.match(/score[^0-9]*?(\d{1,2})[^0-9\/]{0,5}(\d{1,2})/i)
+                 || data.evaluation.match(/(\d{1,2})\s*\/\s*(\d{1,2})/);
+  
+        let percent = 0;
+        if (match) {
+          const score = parseInt(match[1]);
+          const total = parseInt(match[2]);
+          if (!isNaN(score) && !isNaN(total) && total > 0) {
+            percent = Math.round((score / total) * 100);
+          }
+        }
+  
+        showAnswerPopup(data.evaluation, percent);
+        hideLoading();
+      })
+      .catch(err => {
+        console.error("Check answer error", err);
+        alert("Error checking answers.");
+        hideLoading();
+      });
+    }
+  
+    function downloadQuiz() {
+      let content = "";
+      questionsArray.forEach((q, i) => {
+        const answer = document.getElementById(`answer${i}`).value.trim();
+        content += `Q${i + 1}: ${q}\nAnswer: ${answer}\n\n`;
+      });
+  
+      const blob = new Blob([content], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "quiz.txt";
+      link.click();
+    }
+  
+    function showAnswerPopup(message, percent) {
+  document.getElementById("popupMessage").innerText = message;
+
+  // Show the popup
+  document.getElementById("answerPopup").style.display = "flex";
+
+  // Update the main score bar
+  const scoreBarContainer = document.getElementById("scoreBarContainer");
+  const scoreFill = document.getElementById("scoreFill");
+  scoreBarContainer.style.display = "block";
+  scoreFill.style.width = percent + "%";
+  scoreFill.textContent = percent + "%";
+}
+
+  
+    function closeAnswerPopup() {
+      document.getElementById("answerPopup").style.display = "none";
+    }
+  
+    firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    console.log("Logged in as:", user.uid);
+    const profilePic = document.getElementById("profilePic");
+    if (profilePic) {
+      profilePic.src = user.photoURL || "profile.png";
+    }
+  } else {
+    console.log("Not logged in - guest mode active");
+    // window.location.href = "index.html"; ❌ Disable this line
+  }
+});
+
+  </script>
+  
+  </body>
+  </html>
+  

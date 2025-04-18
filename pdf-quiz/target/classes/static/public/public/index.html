@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QuizCrafter AI</title>
+  <link rel="icon" href="logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="firebase.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #1f1f1f, #2c2c2c);
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background: #2a2a2a;
+      padding: 60px 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+      text-align: center;
+      width: 320px;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .logo {
+      width: 240px;
+      margin: 0 auto 30px auto;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      margin: 12px 0;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .btn.google {
+      background-color: #61C0BF; /* Light turquoise */
+      color: #1e1e1e;
+    }
+
+    .btn.google:hover {
+      background-color: #00bfa5;
+    }
+
+    .btn.guest {
+      background-color: #4e4e4e;
+      color:#FAE3D9;
+    }
+
+    .btn.guest:hover {
+      background-color: #666;
+    }
+
+    .footer-note {
+      font-size: 13px;
+      color: #bbb;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <img src="logo.png" alt="QuizCrafter AI Logo" class="logo" />
+
+    <div>
+      <button class="btn google" onclick="googleLogin()">
+        <i class="fab fa-google"></i> Sign in with Google
+      </button>
+
+      <button class="btn guest" onclick="window.location.href='main.html'">
+        <i class="fas fa-user-secret"></i> Continue as Guest
+      </button>
+    </div>
+    
+    
+    <div class="footer-note"><p style="font-family: 'Poppins', sans-serif; font-size: 14px; color: #bbb; letter-spacing: 0.5px;">
+      A product of <strong style="color: #ffffff;">INFORAI 🔮</strong>
+    </p></div>
+  </div>
+
+  <script>
+    function googleLogin() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then(result => {
+          localStorage.setItem('user', JSON.stringify(result.user));
+          window.location.href = 'main.html';
+        })
+        .catch(error => {
+          alert('Login failed: ' + error.message);
+        });
+    }
+  </script>
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyCLiXp4zwS3y3yLlCXPJEYiWzmIBOCpSQ0",
+      authDomain: "quizcrafter-ai.firebaseapp.com",
+      projectId: "quizcrafter-ai",
+      storageBucket: "quizcrafter-ai.firebasestorage.app",
+      messagingSenderId: "585560085435",
+      appId: "1:585560085435:web:47c3de8853451527afaa9e",
+      measurementId: "G-BM1DP2XESZ"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
+</body>
+</html>

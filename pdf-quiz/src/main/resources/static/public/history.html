@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QuizCrafter AI</title>
+  <link rel="icon" href="logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* Your existing CSS stays unchanged */
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: start;
+      min-height: 100vh;
+      padding-top: 50px;
+    }
+
+    .main-container {
+      background-color: #1e1e1e;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+      position: relative;
+    }
+
+    .logo {
+      width: 240px;
+      margin-bottom: 25px;
+    }
+
+    .history-entry {
+      background-color: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .history-entry strong {
+      color: #61C0BF;
+    }
+
+    .action-buttons {
+      margin-top: 10px;
+    }
+
+    .action-button {
+      padding: 8px 16px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      background: linear-gradient(145deg, #61C0BF, #61C0BF);
+      color: #1f1f1f;
+      box-shadow: 0 0 15px rgba(29, 233, 182, 0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .action-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(29, 233, 182, 0.6);
+    }
+
+    .profile-container {
+      position: fixed;
+      top: 20px;
+      right: 30px;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .profile-pic {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid #1de9b6;
+      object-fit: cover;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 55px;
+      right: 0;
+      background-color: #2c2c2c;
+      border: 1px solid #444;
+      border-radius: 10px;
+      padding: 10px 0;
+      box-shadow: 0 0 10px rgba(0,0,0,0.6);
+      width: 160px;
+      z-index: 20;
+    }
+
+    .dropdown-menu a {
+      display: block;
+      padding: 10px 20px;
+      color: white;
+      text-decoration: none;
+    }
+
+    .dropdown-menu a:hover {
+      background-color: #3a3a3a;
+    }
+
+    .back-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background-color: #1de9b6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #121212;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(29, 233, 182, 0.6);
+      z-index: 20;
+    }
+
+    .entry-image {
+      max-width: 100%;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #444;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Back Button -->
+  <div class="back-button" onclick="window.location.href='main.html'">
+    <i class="fas fa-arrow-left"></i>
+  </div>
+
+  <!-- Profile Menu -->
+  <div class="profile-container" onclick="toggleDropdown()">
+    <img id="profilePic" src="profile.png" alt="Profile" class="profile-pic" />
+    <div id="dropdownMenu" class="dropdown-menu">
+      <a href="profile.html">View Profile</a>
+      <a href="main.html">Back to Quiz</a>
+    </div>
+  </div>
+
+  <!-- History Container -->
+  <div class="main-container">
+    <img src="logo.png" alt="QuizCrafter AI Logo" class="logo" />
+    <h2>Your Quiz History</h2>
+    <div id="historyList"></div>
+  </div>
+
+  <!-- Firebase (Firestore version) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCLiXp4zwS3y3yLlCXPJEYiWzmIBOCpSQ0",
+      authDomain: "quizcrafter-ai.firebaseapp.com",
+      projectId: "quizcrafter-ai",
+      storageBucket: "quizcrafter-ai.appspot.com",
+      messagingSenderId: "585560085435",
+      appId: "1:585560085435:web:47c3de8853451527afaa9e",
+      measurementId: "G-BM1DP2XESZ"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+    firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    console.log("Logged in as:", user.uid);
+
+    const profilePic = document.getElementById("profilePic");
+    if (user.photoURL) {
+      profilePic.src = user.photoURL;
+    } else {
+      profilePic.src = "profile.png"; // fallback/default avatar
+    }
+  } else {
+    console.log("Not logged in");
+    document.getElementById("profilePic").src = "profile.png";
+  }
+});
+
+
+    function toggleDropdown() {
+      const menu = document.getElementById("dropdownMenu");
+      menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
+
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+      const userId = user.uid;
+      const historyRef = db.collection("quizzes").where("uid", "==", userId);
+      const historyList = document.getElementById("historyList");
+
+      try {
+        const snapshot = await historyRef.get(); // <--- This line defines `snapshot`
+
+        if (snapshot.empty) {
+          historyList.innerHTML = "<p>No quiz history found.</p>";
+        } else {
+          snapshot.forEach((doc) => {
+  const data = doc.data();
+  const questions = data.questions || [];
+  const encoded = encodeURIComponent(JSON.stringify(questions));
+  const date = data.createdAt
+  ? data.createdAt.toDate().toLocaleString("en-US", {
+      timeZone: "Asia/Dhaka",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })
+  : "Unknown";
+
+  const entry = document.createElement("div");
+  entry.className = "history-entry";
+  entry.innerHTML = `
+    <p><strong>Date:</strong> ${date}</p>
+    ${data.score !== undefined ? `<p><strong>Score:</strong> ${data.score}%</p>` : ""}
+    <div class="action-buttons">
+      <button class="action-button" onclick="downloadQuestions('${doc.id}', '${encoded}')">Download</button>
+      <button class="action-button" onclick="deleteHistory('${doc.id}')">Delete</button>
+    </div>
+  `;
+  historyList.appendChild(entry);
+});
+
+        }
+      } catch (error) {
+        console.error("Error fetching history:", error);
+        historyList.innerHTML = "<p>Failed to load quiz history.</p>";
+      }
+    } else {
+      console.log("User not logged in");
+      document.getElementById("historyList").innerHTML = "<p>Please log in to view your history.</p>";
+    }
+  });
+
+  function deleteHistory(key) {
+  firebase.firestore().collection("quizzes").doc(key).delete()
+    .then(() => location.reload())
+    .catch((err) => console.error("Delete failed:", err));
+}
+
+
+    function downloadQuestions(key, encodedQuestions) {
+      try {
+        const questions = JSON.parse(decodeURIComponent(encodedQuestions));
+        const blob = new Blob([questions.join("\n")], { type: "text/plain" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `quiz-${key}.txt`;
+        link.click();
+      } catch (err) {
+        console.error("Failed to download questions:", err);
+      }
+    }
+  </script>
+</body>
+</html>
